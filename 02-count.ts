@@ -1,6 +1,6 @@
-import { readdir } from "fs/promises";
+import * as cheerio from "cheerio";
 
-const keywords = ["Bộ Công an"];
+const keywords = ["Bộ Công an", "ban hành", "điều tra"];
 
 async function countKeywords() {
   try {
@@ -15,12 +15,14 @@ async function countKeywords() {
     // Process each law file
     for (const [index, file] of lawFiles.entries()) {
       const content = await Bun.file(`laws/${file}`).text();
+      const parsedContent = cheerio.load(content);
+      const lawText = parsedContent(".content1").text();
       const keywordCounts: { [key: string]: number } = {};
 
       // Count occurrences of each keyword
       for (const keyword of keywords) {
         const regex = new RegExp(keyword, "gi");
-        const matches = content.match(regex);
+        const matches = lawText.match(regex);
         keywordCounts[keyword] = matches ? matches.length : 0;
       }
 
